@@ -192,8 +192,13 @@ static class Code
         {
             ulong total = 0;
 
+            if (splitter.Visited) return splitter.Value;
+
+			splitter.Visited = true;
+
             if (splitter.LeftSplitter is null && splitter.RightSplitter is null)
             {
+	            splitter.Value = 2;
                 return 2;
             }
 
@@ -204,15 +209,29 @@ static class Code
 
             if (splitter.LeftSplitter is not null)
             {
-                total += QuantamPathSearch(splitter.LeftSplitter);
+	            if (splitter.LeftSplitter.Visited)
+	            {
+                    total += splitter.LeftSplitter.Value;
+				}
+	            else
+	            {
+		            total += QuantamPathSearch(splitter.LeftSplitter);
+	            }
             }
 
             if (splitter.RightSplitter is not null)
             {
-                total += QuantamPathSearch(splitter.RightSplitter);
-            }
+	            if (splitter.RightSplitter.Visited)
+	            {
+		            total += splitter.RightSplitter.Value;
+	            }
+	            else
+	            {
+		            total += QuantamPathSearch(splitter.RightSplitter);
+	            }
+			}
 
-            Console.WriteLine(total);
+            splitter.Value = total;
 
             return total;
         }
@@ -239,6 +258,9 @@ static class Code
         public Splitter? LeftSplitter { get; set; }
         public Splitter? RightSplitter { get; set; }
         public Tile ParentTile { get; set; } = null!;
+
+        public bool Visited { get; set; }
+        public ulong Value { get; set; }
     }
 
     public enum State
