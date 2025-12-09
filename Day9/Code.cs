@@ -141,6 +141,66 @@ static class Code
             return false;
         }
 
+        public List<Tile> GetNoneRedTileCorners(List<Tile> redTiles)
+        {
+            List<Tile> nonRedTiles = [];
+
+            if (!redTiles.Any(rt => rt.XPos == TopLeft.XPos && rt.YPos == TopLeft.YPos))
+            {
+                nonRedTiles.Add(TopLeft);
+            }
+
+            if (!redTiles.Any(rt => rt.XPos == TopRight.XPos && rt.YPos == TopRight.YPos))
+            {
+                nonRedTiles.Add(TopRight);
+            }
+
+            if (!redTiles.Any(rt => rt.XPos == BottomRight.XPos && rt.YPos == BottomRight.YPos))
+            {
+                nonRedTiles.Add(BottomRight);
+            }
+
+            if (!redTiles.Any(rt => rt.XPos == BottomLeft.XPos && rt.YPos == BottomLeft.YPos))
+            {
+                nonRedTiles.Add(BottomLeft);
+            }
+
+            return nonRedTiles;
+        }
+
+        public bool HasTileOutsideBound(List<Tile> redTiles, List<Line> lines)
+        {
+            List<Tile> nonRedTiles = GetNoneRedTileCorners(redTiles);
+
+            foreach (Tile nonRedTile in nonRedTiles)
+            {
+                int rightLineCount = 0;
+
+                foreach (Line line in lines)
+                {
+                    if (line.IsAbove(nonRedTile.YPos) ||
+                        line.IsLeftOf(nonRedTile.XPos) ||
+                        line.IsBelow(nonRedTile.YPos) ||
+                        (line.IsHorizontal && line.Tile1.YPos == nonRedTile.YPos))
+                    {
+                        continue;
+                    }
+
+                    if (line.IsRightOf(nonRedTile.XPos))
+                    {
+                        rightLineCount++;
+                    }
+                }
+
+                if (rightLineCount % 2 == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static List<Rectangle> GetAllRectangles(List<Tile> redTiles, bool removeOutOfBounds)
         {
             List<Rectangle> rectangles = [];
@@ -181,8 +241,11 @@ static class Code
 
             if (removeOutOfBounds)
             {
-                rectangles.RemoveAll(r => redTiles.Any(t => r.IsTileInRectangle(t)) || lines.Any(l => r.DoesLineCrossBounds(l)));
+                rectangles.RemoveAll(r => redTiles.Any(t => r.IsTileInRectangle(t)) || lines.Any(l => r.DoesLineCrossBounds(l)) || r.HasTileOutsideBound(redTiles, lines));
             }
+
+            //227697704
+            //4064712769
 
             return rectangles;
 		}
@@ -225,24 +288,30 @@ static class Code
             return false;
         }
 
-        public bool IsAbove(int index)
+        public bool IsAbove(long yPos)
         {
-            return (IsHorizontal && Tile1.YPos < index) || (IsVertical && Math.Max(Tile1.YPos, Tile2.YPos) < index);
+            return (IsHorizontal && Tile1.YPos < yPos) || (IsVertical && Math.Max(Tile1.YPos, Tile2.YPos) < yPos);
         }
 
-        public bool IsBelow(int index)
+        public bool IsBelow(long yPos)
         {
-            return (IsHorizontal && Tile1.YPos > index) || (IsVertical && Math.Min(Tile1.YPos, Tile2.YPos) > index);
+            return (IsHorizontal && Tile1.YPos > yPos) || (IsVertical && Math.Min(Tile1.YPos, Tile2.YPos) > yPos);
         }
 
-        public bool IsLeftOf(int index)
+        public bool IsLeftOf(long xPos)
         {
-            return (IsHorizontal && Math.Max(Tile1.XPos, Tile2.XPos) < index) || (IsVertical && Tile1.XPos < index);
+            return (IsHorizontal && Math.Max(Tile1.XPos, Tile2.XPos) < xPos) || (IsVertical && Tile1.XPos < xPos);
         }
 
-        public bool IsLeftRight(int index)
+        public bool IsRightOf(long xPos)
         {
-            return (IsHorizontal && Math.Min(Tile1.XPos, Tile2.XPos) > index) || (IsVertical && Tile1.XPos > index);
+            return (IsHorizontal && Math.Min(Tile1.XPos, Tile2.XPos) > xPos) || (IsVertical && Tile1.XPos > xPos);
+        }
+
+        public bool IsTileOnLine(Tile tile)
+        {
+            return (IsHorizontal && tile.YPos == Tile1.YPos && tile.XPos > Math.Min(Tile1.XPos, Tile2.XPos) && tile.XPos < Math.Max(Tile1.XPos, Tile2.XPos))
+                || (IsVertical && tile.XPos == Tile1.XPos && tile.YPos > Math.Min(Tile1.YPos, Tile2.YPos) && tile.YPos < Math.Max(Tile1.YPos, Tile2.YPos));
         }
     }
 }
