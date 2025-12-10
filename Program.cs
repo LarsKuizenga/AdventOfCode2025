@@ -1,3 +1,3 @@
-﻿using AdventOfCode2025.Day9;
+﻿using AdventOfCode2025.Day10;
 
 Code.Solve();
