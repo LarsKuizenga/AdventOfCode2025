@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace AdventOfCode2025.Day7;
+﻿namespace AdventOfCode2025.Day7;
 
 static class Code
 {

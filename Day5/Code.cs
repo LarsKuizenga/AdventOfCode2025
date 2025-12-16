@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace AdventOfCode2025.Day5;
+﻿namespace AdventOfCode2025.Day5;
 
 static class Code
 {
